@@ -1,0 +1,67 @@
+#!/bin/zsh
+# ─── terminal-setup: Zsh config ─────────────────────────────────────
+# Shared tools → ~/.shellrc | Zsh-only → this file
+
+# ─── Homebrew prefix (for zsh plugins) ───────────────────────────────
+if [[ -d /opt/homebrew ]]; then
+    BREW_PREFIX="/opt/homebrew"
+elif [[ -d /usr/local/Cellar ]]; then
+    BREW_PREFIX="/usr/local"
+else
+    BREW_PREFIX=""
+fi
+
+# ─── Shared bash/zsh tools ───────────────────────────────────────────
+[[ -f ~/.shellrc ]] && source ~/.shellrc
+
+# ─── Zsh plugins ─────────────────────────────────────────────────────
+# Autosuggestions (fish-like suggestions)
+if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+fi
+
+# Completions
+if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/share/zsh-completions" ]]; then
+    fpath=("$BREW_PREFIX/share/zsh-completions" $fpath)
+elif [[ -d /usr/share/zsh-completions ]]; then
+    fpath=(/usr/share/zsh-completions $fpath)
+fi
+autoload -Uz compinit && compinit
+
+# Substring + case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=*'
+
+# ─── History ─────────────────────────────────────────────────────────
+HISTSIZE=50000
+SAVEHIST=50000
+HISTFILE=~/.zsh_history
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_SPACE
+setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+
+# ─── History prefix search (↑/↓) ─────────────────────────────────────
+autoload -U up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+
+# ─── Word navigation (Ctrl+←/→) ──────────────────────────────────────
+bindkey '^[[1;5D' backward-word
+bindkey '^[[1;5C' forward-word
+bindkey '^[[5D' backward-word
+bindkey '^[[5C' forward-word
+
+# ─── zsh-syntax-highlighting (must be last) ──────────────────────────
+if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
