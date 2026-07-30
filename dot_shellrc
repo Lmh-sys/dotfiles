@@ -170,12 +170,6 @@ _shellrc_source_ros() {
 # system ROS distro (path exists → source)
 _shellrc_source_ros /opt/ros/jazzy
 
-# ─── ROS2 / Colcon zsh completions ───────────────────────────────
-if [[ -n "$ZSH_VERSION" ]]; then
-    eval "$(register-python-argcomplete --shell zsh ros2)"
-    eval "$(register-python-argcomplete --shell zsh colcon 2>/dev/null || true)"
-fi
-
 export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}"
 export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-99}"
 

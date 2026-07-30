@@ -35,6 +35,13 @@ autoload -Uz compinit && compinit
 # Substring + case-insensitive completion
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=*'
 
+# ─── ROS2 / Colcon completions ───────────────────────────────────────
+# Register after compinit and after ROS setup scripts have been sourced.
+if command -v register-python-argcomplete >/dev/null 2>&1; then
+    eval "$(register-python-argcomplete --shell zsh ros2 2>/dev/null || true)"
+    command -v colcon >/dev/null 2>&1 && eval "$(register-python-argcomplete --shell zsh colcon 2>/dev/null || true)"
+fi
+
 # ─── History ─────────────────────────────────────────────────────────
 HISTSIZE=50000
 SAVEHIST=50000
