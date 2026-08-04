@@ -118,3 +118,5 @@ fi
 
 # ─── Shared bash/zsh tools + user env (see ~/.shellrc) ───────────────
 [ -f "$HOME/.shellrc" ] && . "$HOME/.shellrc"
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_DOMAIN_ID=10

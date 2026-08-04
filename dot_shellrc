@@ -175,6 +175,10 @@ export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-99}"
 
 # workspace overlay
 _shellrc_source_ros "$HOME/code/jazzy/rely_ws/install"
+# livox_ros_driver2 uses an isolated install prefix, so load its ROS 2 environment explicitly.
+if [[ -f "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh" ]]; then
+    source "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh"
+fi
 
 # ─── Local Xwayland display (SSH → desktop GUI) ──────────────────────
 use_local_display() {

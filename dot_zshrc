@@ -14,32 +14,59 @@ fi
 # ─── Shared bash/zsh tools ───────────────────────────────────────────
 [[ -f ~/.shellrc ]] && source ~/.shellrc
 
-# ─── Zsh plugins ─────────────────────────────────────────────────────
-# Autosuggestions (fish-like suggestions)
-if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-fi
-
-# Completions
+# ─── Completions (before autosuggestions) ────────────────────────────
 if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/share/zsh-completions" ]]; then
     fpath=("$BREW_PREFIX/share/zsh-completions" $fpath)
 elif [[ -d /usr/share/zsh-completions ]]; then
     fpath=(/usr/share/zsh-completions $fpath)
 fi
-autoload -Uz compinit && compinit
 
-# Substring + case-insensitive completion
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=*'
+# Ubuntu /etc/zsh/zshrc 也会 compinit；这里再跑一次以吃到上面的 fpath
+# 注意：~/.shellrc 把 find 别名成了 fd，这里用 zsh 原生时间判断
+autoload -Uz compinit
+if [[ ! -s ~/.zcompdump ]]; then
+    compinit
+else
+    # dump 超过 1 天则重建（不用 find：已被 alias 成 fd）
+    zmodload zsh/datetime 2>/dev/null || true
+    _zcomp_mtime=$(date -r "$HOME/.zcompdump" +%s 2>/dev/null || stat -c %Y "$HOME/.zcompdump" 2>/dev/null || echo 0)
+    if (( ${EPOCHSECONDS:-$(date +%s)} - _zcomp_mtime > 86400 )); then
+        compinit
+    else
+        compinit -C
+    fi
+    unset _zcomp_mtime
+fi
+
+# 补全行为：菜单选择 + 大小写不敏感（去掉 r:|=* 过激进匹配）
+zmodload zsh/complist 2>/dev/null || true
+setopt COMPLETE_IN_WORD ALWAYS_TO_END AUTO_LIST AUTO_MENU AUTO_PARAM_SLASH
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+# 允许补全 . 与 ..（否则 cd .. 后 Tab 不会出现 ../）
+zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zcompcache
+mkdir -p ~/.zcompcache
 
 # ─── ROS2 / Colcon completions ───────────────────────────────────────
-# Register after compinit and after ROS setup scripts have been sourced.
+# 须在 compinit 与 ROS setup 之后注册
 if command -v register-python-argcomplete >/dev/null 2>&1; then
     eval "$(register-python-argcomplete --shell zsh ros2 2>/dev/null || true)"
     command -v colcon >/dev/null 2>&1 && eval "$(register-python-argcomplete --shell zsh colcon 2>/dev/null || true)"
+fi
+
+# ─── Autosuggestions（依赖 completion，放在 compinit 后） ────────────
+# 只用 history 策略：completion 策略会抢补全系统，表现为 Tab 卡住/无响应
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+ZSH_AUTOSUGGEST_STRATEGY=(history)
+if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 # ─── History ─────────────────────────────────────────────────────────
@@ -53,22 +80,40 @@ setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 
-# ─── History prefix search (↑/↓) ─────────────────────────────────────
+# ─── Key bindings（syntax-highlighting 之前先设一轮） ────────────────
+bindkey -e
 autoload -U up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 bindkey '^[[A' up-line-or-beginning-search
 bindkey '^[[B' down-line-or-beginning-search
-
-# ─── Word navigation (Ctrl+←/→) ──────────────────────────────────────
 bindkey '^[[1;5D' backward-word
 bindkey '^[[1;5C' forward-word
 bindkey '^[[5D' backward-word
 bindkey '^[[5C' forward-word
 
-# ─── zsh-syntax-highlighting (must be last) ──────────────────────────
+# ─── zsh-syntax-highlighting (must be last plugin) ───────────────────
 if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
     source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
+
+# ─── Tab 补全：必须放在所有插件之后再绑一次 ─────────────────────────
+bindkey -M emacs '^I' complete-word
+bindkey -M viins '^I' complete-word
+# Ctrl+Space 备用（Tab 被 IDE/输入法截获时仍能补全）
+bindkey -M emacs '^@' complete-word
+bindkey -M viins '^@' complete-word
+if bindkey -l 2>/dev/null | command grep -qx menuselect; then
+    bindkey -M menuselect '^[[Z' reverse-menu-complete
+fi
+
+# 快速自检：在终端执行 zsh-comp-check
+zsh-comp-check() {
+    print -r -- "Tab 绑定: $(bindkey '^I')"
+    print -r -- "补全函数数: ${#_comps}"
+    print -r -- "cd 补全: ${_comps[cd]:-无}"
+    print -r -- "下一步: 输入 cd 空格后按 Tab；若无反应再试 Ctrl+Space"
+    print -r -- "若仍无反应: 状态栏是否显示 Tab 焦点模式？按 Ctrl+M 关掉"
+}
