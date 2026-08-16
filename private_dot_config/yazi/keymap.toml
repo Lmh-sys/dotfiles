@@ -1,0 +1,194 @@
+[[mgr.prepend_keymap]]
+on   = "l"
+run  = "plugin smart-enter"
+desc = "进入目录或打开文件"
+
+[[mgr.prepend_keymap]]
+on   = "<Right>"
+run  = "plugin smart-enter"
+desc = "进入目录或打开文件"
+
+[[mgr.prepend_keymap]]
+on   = "."
+run  = "hidden toggle"
+desc = "切换隐藏文件显示"
+
+[[mgr.prepend_keymap]]
+on   = "F"
+run  = "plugin smart-filter"
+desc = "智能过滤当前目录"
+
+[[mgr.prepend_keymap]]
+on   = "s"
+run  = "search --via=fd"
+desc = "按文件名搜索"
+
+[[mgr.prepend_keymap]]
+on   = "S"
+run  = "search --via=rg"
+desc = "按文件内容搜索"
+
+[[mgr.prepend_keymap]]
+on   = "<C-s>"
+run  = "escape --search"
+desc = "停止搜索"
+
+[[mgr.prepend_keymap]]
+on   = "z"
+run  = "plugin fzf"
+desc = "通过 fzf 跳转"
+
+[[mgr.prepend_keymap]]
+on   = "Z"
+run  = "plugin zoxide"
+desc = "通过 zoxide 跳转"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "h" ]
+run  = "cd ~"
+desc = "跳转到主目录"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "c" ]
+run  = "cd ~/.config"
+desc = "跳转到配置目录"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "d" ]
+run  = "cd ~/Downloads"
+desc = "跳转到下载目录"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "p" ]
+run  = "cd ~/Projects"
+desc = "跳转到项目目录"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "." ]
+run  = "cd ~/.dotfiles"
+desc = "跳转到 dotfiles"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "<Space>" ]
+run  = "cd --interactive"
+desc = "交互式跳转目录"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "f" ]
+run  = "follow"
+desc = "跟随符号链接"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "c" ]
+run  = "copy path"
+desc = "复制完整路径"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "d" ]
+run  = "copy dirname"
+desc = "复制目录路径"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "f" ]
+run  = "copy filename"
+desc = "复制文件名"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "n" ]
+run  = "copy name_without_ext"
+desc = "复制不含扩展名的文件名"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "a", "a" ]
+run  = "plugin compress"
+desc = "压缩选中的文件"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "a", "p" ]
+run  = "plugin compress -p"
+desc = "压缩选中的文件并设置密码"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "a", "h" ]
+run  = "plugin compress -ph"
+desc = "压缩选中的文件并加密文件头"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "a", "l" ]
+run  = "plugin compress -l"
+desc = "压缩选中的文件并设置压缩级别"
+
+[[mgr.prepend_keymap]]
+on   = [ "c", "a", "u" ]
+run  = "plugin compress -phl"
+desc = "压缩选中的文件并启用完整选项"
+
+[[mgr.prepend_keymap]]
+on   = "+"
+run  = "plugin zoom 1"
+desc = "放大预览"
+
+[[mgr.prepend_keymap]]
+on   = "-"
+run  = "plugin zoom -1"
+desc = "缩小预览"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "s" ]
+run  = "linemode size"
+desc = "行模式显示大小"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "p" ]
+run  = "linemode permissions"
+desc = "行模式显示权限"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "m" ]
+run  = "linemode mtime"
+desc = "行模式显示修改时间"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "b" ]
+run  = "linemode btime"
+desc = "行模式显示创建时间"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "o" ]
+run  = "linemode owner"
+desc = "行模式显示所有者"
+
+[[mgr.prepend_keymap]]
+on   = [ "m", "n" ]
+run  = "linemode none"
+desc = "关闭行模式"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "n" ]
+run  = "sort natural --reverse=no"
+desc = "按自然顺序排序"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "N" ]
+run  = "sort natural --reverse"
+desc = "按自然顺序倒序排序"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "m" ]
+run  = [ "sort mtime --reverse", "linemode mtime" ]
+desc = "按修改时间排序"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "s" ]
+run  = [ "sort size --reverse", "linemode size" ]
+desc = "按文件大小排序"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "e" ]
+run  = "sort extension --reverse=no"
+desc = "按扩展名排序"
+
+[[mgr.prepend_keymap]]
+on   = [ ",", "a" ]
+run  = "sort alphabetical --reverse=no"
+desc = "按字母顺序排序"
