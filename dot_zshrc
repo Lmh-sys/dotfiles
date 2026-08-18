@@ -117,3 +117,4 @@ zsh-comp-check() {
     print -r -- "下一步: 输入 cd 空格后按 Tab；若无反应再试 Ctrl+Space"
     print -r -- "若仍无反应: 状态栏是否显示 Tab 焦点模式？按 Ctrl+M 关掉"
 }
+

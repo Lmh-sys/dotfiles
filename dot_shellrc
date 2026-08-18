@@ -1,12 +1,12 @@
-# ─── Shared shell config (bash + zsh) ────────────────────────────────
-# Sourced by ~/.bashrc and ~/.zshrc. Keep this POSIX-ish / dual-shell safe.
-# Zsh-only features (plugins, setopt, bindkey) stay in ~/.zshrc.
+# ─── 共享 Shell 配置（bash + zsh）────────────────────────────────
+# 被 ~/.bashrc 和 ~/.zshrc 引用。请保持 POSIX 风格 / 双 Shell 兼容。
+# Zsh 专属功能（插件、setopt、bindkey）请放在 ~/.zshrc 中。
 
-# Guard: only once per shell session
+# 守卫：每个 Shell 会话仅加载一次
 [ -n "${_SHELLRC_LOADED:-}" ] && return 0
 _SHELLRC_LOADED=1
 
-# Detect shell for init hooks
+# 检测当前 Shell，用于后续初始化钩子
 if [ -n "${ZSH_VERSION:-}" ]; then
     _SHELLRC_SHELL=zsh
 elif [ -n "${BASH_VERSION:-}" ]; then
@@ -16,13 +16,13 @@ else
 fi
 
 # ─── PATH ────────────────────────────────────────────────────────────
-# Prefer user-local bins
+# 优先使用用户本地 bin
 case ":$PATH:" in
     *":$HOME/.local/bin:"*) ;;
     *) export PATH="$HOME/.local/bin:$PATH" ;;
 esac
 
-# Homebrew (macOS)
+# Homebrew（macOS）
 if [ -d /opt/homebrew/bin ]; then
     case ":$PATH:" in
         *":/opt/homebrew/bin:"*) ;;
@@ -35,7 +35,7 @@ elif [ -d /usr/local/Cellar ]; then
     esac
 fi
 
-# fnm binary path (Linux installer default)
+# fnm 二进制路径（Linux 安装器默认路径）
 if [ -d "$HOME/.local/share/fnm" ]; then
     case ":$PATH:" in
         *":$HOME/.local/share/fnm:"*) ;;
@@ -43,7 +43,7 @@ if [ -d "$HOME/.local/share/fnm" ]; then
     esac
 fi
 
-# ─── Starship prompt ────────────────────────────────────────────────
+# ─── Starship 提示符 ────────────────────────────────────────────────
 if command -v starship >/dev/null 2>&1 && [ "$_SHELLRC_SHELL" != sh ]; then
     eval "$(starship init "$_SHELLRC_SHELL")"
 fi
@@ -72,18 +72,18 @@ if command -v fd >/dev/null 2>&1; then
     export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
 fi
 
-# ─── Zoxide (smart cd) ──────────────────────────────────────────────
+# ─── Zoxide（智能 cd）──────────────────────────────────────────────
 if command -v zoxide >/dev/null 2>&1 && [ "$_SHELLRC_SHELL" != sh ]; then
     eval "$(zoxide init "$_SHELLRC_SHELL")"
 fi
 
-# ─── fnm (Node version manager) ─────────────────────────────────────
+# ─── fnm（Node 版本管理器）─────────────────────────────────────────
 if command -v fnm >/dev/null 2>&1 && [ "$_SHELLRC_SHELL" != sh ]; then
     eval "$(fnm env --use-on-cd --shell "$_SHELLRC_SHELL")"
 fi
 
-# ─── SSH key switcher (fallback for multi-account setups) ────────────
-# Usage: set-ssh-key lewis-official-20260224
+# ─── SSH 密钥切换器（多账号场景备用方案）────────────────────────
+# 用法：set-ssh-key lewis-official-20260224
 set-ssh-key() {
     local key="$HOME/.ssh/$1"
     if [ ! -f "$key" ]; then
@@ -98,8 +98,8 @@ set-ssh-key() {
     echo "Active SSH key: $1"
 }
 
-# ─── Aliases (modern CLI tools) ──────────────────────────────────────
-# Only bind when the tool exists, so bare systems stay usable.
+# ─── 别名（现代 CLI 工具）─────────────────────────────────────────
+# 仅当工具存在时才绑定别名，确保裸系统仍可使用。
 command -v eza >/dev/null 2>&1 && {
     alias ls='eza --icons --group-directories-first'
     alias ll='eza -la --icons --group-directories-first'
@@ -124,7 +124,7 @@ if [ -n "${PNPM_HOME:-}" ]; then
     esac
 fi
 
-# ─── User aliases ────────────────────────────────────────────────────
+# ─── 用户自定义别名 ──────────────────────────────────────────────────
 alias sudo='sudo '
 command -v gnome-text-editor >/dev/null 2>&1 && alias gedit='gnome-text-editor'
 
@@ -136,10 +136,10 @@ if [ -d "$HOME/.fishros/bin" ]; then
     esac
 fi
 
-# ─── ROS (shell-aware setup scripts) ─────────────────────────────────
-# Prefer setup.$shell, fall back to setup.sh
+# ─── ROS（根据 Shell 类型加载配置脚本）─────────────────────────────
+# 优先加载 setup.$shell，回退到 setup.sh
 _shellrc_source_ros() {
-    # $1 = setup dir containing setup.bash / setup.zsh / setup.sh
+    # $1 = 包含 setup.bash / setup.zsh / setup.sh 的目录
     local dir="$1"
     [ -d "$dir" ] || return 0
     case "$_SHELLRC_SHELL" in
@@ -167,45 +167,48 @@ _shellrc_source_ros() {
     esac
 }
 
-# system ROS distro (path exists → source)
+# 系统级 ROS 发行版（路径存在则 source）
 _shellrc_source_ros /opt/ros/jazzy
 
 export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-rmw_cyclonedds_cpp}"
 export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-99}"
 
-# workspace overlay
+# 工作空间覆盖
 _shellrc_source_ros "$HOME/code/jazzy/rely_ws/install"
-# livox_ros_driver2 uses an isolated install prefix, so load its ROS 2 environment explicitly.
+# livox_ros_driver2 使用独立的安装前缀，因此需要显式加载其 ROS 2 环境。
 if [[ -f "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh" ]]; then
     source "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh"
 fi
 
-# ─── Local Xwayland display (SSH → desktop GUI) ──────────────────────
+# ─── 本地 Xwayland 显示器（SSH → 桌面 GUI）────────────────────────
 use_local_display() {
     local auth
+    # 查找最新的 Mutter Xwayland 认证文件
     auth="$(ls -1t /run/user/"$(id -u)"/.mutter-Xwaylandauth.* 2>/dev/null | head -n1 || true)"
     if [ -n "$auth" ] && [ -r "$auth" ] && [ -S /tmp/.X11-unix/X0 ]; then
+        # 设置显示器编号，默认 :0
         export DISPLAY="${DISPLAY:-:0}"
         [ "$DISPLAY" = ":0.0" ] && export DISPLAY=:0
+        # 设置 X 认证文件路径
         export XAUTHORITY="$auth"
         return 0
     fi
-    echo "local Xwayland display/auth not found" >&2
+    echo "未找到本地 Xwayland 显示器/认证文件" >&2
     return 1
 }
 
-# SSH sessions: bind to local desktop so rviz2/xclock can show
+# SSH 会话：绑定到本地桌面，使 rviz2/xclock 等能正常显示
 if [ -n "${SSH_CONNECTION:-}" ]; then
     use_local_display >/dev/null 2>&1 || true
 fi
 
-# ─── nvm (optional; may coexist with fnm) ────────────────────────────
+# ─── nvm（可选；可与 fnm 共存）────────────────────────────────────
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
     # shellcheck source=/dev/null
     . "$NVM_DIR/nvm.sh"
 fi
-# bash completion only
+# bash 自动补全（仅 bash 需要）
 if [ "$_SHELLRC_SHELL" = bash ] && [ -s "$NVM_DIR/bash_completion" ]; then
     # shellcheck source=/dev/null
     . "$NVM_DIR/bash_completion"
@@ -213,3 +216,18 @@ fi
 
 unset -f _shellrc_source_ros 2>/dev/null || true
 unset _SHELLRC_SHELL
+function y() {
+	local tmp cwd; tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd" || builtin true
+	command rm -f -- "$tmp"
+}
+
+# pnpm
+export PNPM_HOME="/home/langyi/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
