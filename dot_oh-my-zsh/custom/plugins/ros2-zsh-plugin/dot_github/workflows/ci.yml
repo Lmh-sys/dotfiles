@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Syntax check
+        run: |
+          zsh -n ros2-zsh-plugin.plugin.zsh
+          for f in aliases/*.zsh functions/*.zsh tests/*.zsh; do
+            echo "Checking $f"
+            zsh -n "$f"
+          done
+
+      - name: Load test
+        run: zsh tests/test_load.zsh
+
+      - name: Alias expansion test
+        run: zsh tests/test_aliases.zsh
+
+      - name: Function existence test
+        run: zsh tests/test_functions.zsh
+
+      - name: Foxy compatibility test
+        run: |
+          echo "Testing Foxy mode..."
+          ROS2_DISTRO=foxy zsh tests/test_foxy_compat.zsh
+
+      - name: Humble compatibility test
+        run: |
+          echo "Testing Humble mode..."
+          ROS2_DISTRO=humble zsh tests/test_foxy_compat.zsh
+
+      - name: Jazzy compatibility test
+        run: |
+          echo "Testing Jazzy mode..."
+          ROS2_DISTRO=jazzy zsh tests/test_jazzy_compat.zsh
+
+      - name: Lyrical compatibility test
+        run: |
+          echo "Testing Lyrical mode..."
+          ROS2_DISTRO=lyrical zsh tests/test_jazzy_compat.zsh
+
+      - name: Edge case test
+        run: zsh tests/test_edge_cases.zsh
+
+      - name: Security test
+        run: zsh tests/test_security.zsh

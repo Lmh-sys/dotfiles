@@ -2,23 +2,23 @@
 # ─── terminal-setup: Zsh config ─────────────────────────────────────
 # Shared tools → ~/.shellrc | Zsh-only → this file
 
-# ─── Homebrew prefix (for zsh plugins) ───────────────────────────────
-if [[ -d /opt/homebrew ]]; then
-    BREW_PREFIX="/opt/homebrew"
-elif [[ -d /usr/local/Cellar ]]; then
-    BREW_PREFIX="/usr/local"
-else
-    BREW_PREFIX=""
-fi
+# ─── Local zsh plugin directory ─────────────────────────────────────
+# Standard Oh My Zsh custom plugin directory:
+# ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins
+ZSH="${ZSH:-$HOME/.oh-my-zsh}"
+ZSH_PLUGIN_DIR="${ZSH_PLUGIN_DIR:-${ZSH_CUSTOM:-${ZSH:-$HOME/.oh-my-zsh}/custom}/plugins}"
 
 # ─── Shared bash/zsh tools ───────────────────────────────────────────
 [[ -f ~/.shellrc ]] && source ~/.shellrc
 
+# ─── ROS 2 plugin (before compinit) ──────────────────────────────────
+if [[ -f "$ZSH_PLUGIN_DIR/ros2-zsh-plugin/ros2-zsh-plugin.plugin.zsh" ]]; then
+    source "$ZSH_PLUGIN_DIR/ros2-zsh-plugin/ros2-zsh-plugin.plugin.zsh"
+fi
+
 # ─── Completions (before autosuggestions) ────────────────────────────
-if [[ -n "$BREW_PREFIX" && -d "$BREW_PREFIX/share/zsh-completions" ]]; then
-    fpath=("$BREW_PREFIX/share/zsh-completions" $fpath)
-elif [[ -d /usr/share/zsh-completions ]]; then
-    fpath=(/usr/share/zsh-completions $fpath)
+if [[ -d "$ZSH_PLUGIN_DIR/zsh-completions/src" ]]; then
+    fpath=("$ZSH_PLUGIN_DIR/zsh-completions/src" $fpath)
 fi
 
 # Ubuntu /etc/zsh/zshrc 也会 compinit；这里再跑一次以吃到上面的 fpath
@@ -63,10 +63,8 @@ fi
 # 只用 history 策略：completion 策略会抢补全系统，表现为 Tab 卡住/无响应
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 ZSH_AUTOSUGGEST_STRATEGY=(history)
-if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
-    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-elif [[ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
-    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [[ -f "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$ZSH_PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
 
 # ─── History ─────────────────────────────────────────────────────────
@@ -93,10 +91,8 @@ bindkey '^[[5D' backward-word
 bindkey '^[[5C' forward-word
 
 # ─── zsh-syntax-highlighting (must be last plugin) ───────────────────
-if [[ -n "$BREW_PREFIX" && -f "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-elif [[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [[ -f "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
 
 # ─── Tab 补全：必须放在所有插件之后再绑一次 ─────────────────────────
@@ -117,4 +113,3 @@ zsh-comp-check() {
     print -r -- "下一步: 输入 cd 空格后按 Tab；若无反应再试 Ctrl+Space"
     print -r -- "若仍无反应: 状态栏是否显示 Tab 焦点模式？按 Ctrl+M 关掉"
 }
-

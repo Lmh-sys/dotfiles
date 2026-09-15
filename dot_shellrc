@@ -107,7 +107,9 @@ command -v eza >/dev/null 2>&1 && {
 }
 command -v bat >/dev/null 2>&1 && alias cat='bat'
 command -v fd >/dev/null 2>&1 && alias find='fd'
-command -v rg >/dev/null 2>&1 && alias grep='rg'
+# 不要把 grep 替换成 rg：系统脚本常用 grep 的短参数（例如 -Eq），
+# 而 rg 对这些参数的含义不同，会导致配置脚本误报。
+command -v rg >/dev/null 2>&1 && alias rgrep='rg'
 command -v btop >/dev/null 2>&1 && alias top='btop'
 command -v lazygit >/dev/null 2>&1 && alias lg='lazygit'
 
@@ -176,9 +178,18 @@ export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-99}"
 # 工作空间覆盖
 _shellrc_source_ros "$HOME/code/jazzy/rely_ws/install"
 # livox_ros_driver2 使用独立的安装前缀，因此需要显式加载其 ROS 2 环境。
-if [[ -f "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh" ]]; then
-    source "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh"
-fi
+case "$_SHELLRC_SHELL" in
+    zsh)
+        if [ -f "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh" ]; then
+            . "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.zsh"
+        fi
+        ;;
+    bash)
+        if [ -f "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.bash" ]; then
+            . "$HOME/code/jazzy/rely_ws/install/livox_ros_driver2/share/livox_ros_driver2/local_setup.bash"
+        fi
+        ;;
+esac
 
 # ─── 本地 Xwayland 显示器（SSH → 桌面 GUI）────────────────────────
 use_local_display() {
@@ -231,3 +242,24 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
+# deepseek-harness
+alias dsh='cd /home/langyi/Tool/deepseek-harness && pnpm dsh'
+# ros2 jazzy
+alias rundriver='sudo systemctl restart driver.service'
+alias runmapping='sudo systemctl restart mapping.service'
+
+# BEGIN rely_ws CycloneDDS
+# CycloneDDS configuration for rely_ws
+enable_cyclone_dds() {
+    export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    export ROS_DOMAIN_ID=10
+    export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+    export CYCLONEDDS_CONFIG_FILE="/opt/mapping_ws/cyclonedds_remote.xml"
+    source "/opt/mapping_ws/configure_cyclonedds_interface.sh"
+}
+
+# Automatically configure CycloneDDS for interactive shells and systemd services.
+if [[ -n "${INVOCATION_ID:-}" || $- == *i* ]]; then
+    DDS_QUIET=1 enable_cyclone_dds
+fi
+# END rely_ws CycloneDDS
