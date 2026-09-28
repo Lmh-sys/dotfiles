@@ -2,10 +2,17 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-# If not running interactively, don't do anything
+# If not running interactively, don't do aliases/prompt — but still load ROS
+# so `bash -lc` (systemd / foxglove) gets DOMAIN + CycloneDDS.
 case $- in
     *i*) ;;
-      *) return;;
+      *)
+        [ -f "$HOME/.shellrc" ] && . "$HOME/.shellrc"
+        if declare -F enable_cyclone_dds >/dev/null 2>&1; then
+            DDS_QUIET=1 enable_cyclone_dds
+        fi
+        return
+        ;;
 esac
 
 # don't put duplicate lines or lines starting with space in the history.

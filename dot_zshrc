@@ -12,7 +12,7 @@ plugins=(
     copyfile
     copybuffer
     sudo
-    zsh-history-substring-search
+    # zsh-history-substring-search 已禁用：历史搜索改由 fzf Ctrl+R 接管
     you-should-use
     ros2-zsh-plugin
     zsh-completions
@@ -32,7 +32,6 @@ fi
 # Set before OMZ loads zsh-autosuggestions.
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 ZSH_AUTOSUGGEST_STRATEGY=(history)
-HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=(bg=none,fg=magenta,bold)
 
 # OMZ loads the plugins above and runs compinit once.
 source "$ZSH/oh-my-zsh.sh"
@@ -71,16 +70,26 @@ setopt INC_APPEND_HISTORY
 
 # ─── Key bindings ────────────────────────────────────────────────────
 bindkey -e
-zmodload zsh/terminfo 2>/dev/null || true
-if [[ -n "${terminfo[kcuu1]:-}" && -n "${terminfo[kcud1]:-}" ]]; then
-    bindkey "$terminfo[kcuu1]" history-substring-search-up
-    bindkey "$terminfo[kcud1]" history-substring-search-down
-else
-    bindkey '^[[A' history-substring-search-up
-    bindkey '^[[B' history-substring-search-down
+# OMZ lib/key-bindings.zsh 会在 fzf 之后把 Ctrl+R 覆盖成 bck-i-search，
+# 这里在 OMZ 之后重新交给 fzf 历史搜索。历史搜索只保留 Ctrl+R → fzf。
+if (( ${+functions[fzf-history-widget]} )); then
+    zle -N fzf-history-widget
+    bindkey -M emacs '^R' fzf-history-widget
+    bindkey -M viins '^R' fzf-history-widget
+    bindkey -M vicmd '^R' fzf-history-widget
 fi
-bindkey '^P' history-substring-search-up
-bindkey '^N' history-substring-search-down
+# 上下键 / Ctrl+P/N：普通历史翻页（不用 OMZ prefix / substring 搜索）
+zmodload zsh/terminfo 2>/dev/null || true
+bindkey '^P' up-line-or-history
+bindkey '^N' down-line-or-history
+bindkey '^[[A' up-line-or-history
+bindkey '^[[B' down-line-or-history
+if [[ -n "${terminfo[kcuu1]:-}" ]]; then
+    bindkey "$terminfo[kcuu1]" up-line-or-history
+fi
+if [[ -n "${terminfo[kcud1]:-}" ]]; then
+    bindkey "$terminfo[kcud1]" down-line-or-history
+fi
 bindkey '^[[1;5D' backward-word
 bindkey '^[[1;5C' forward-word
 bindkey '^[[5D' backward-word

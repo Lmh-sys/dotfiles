@@ -247,12 +247,13 @@ alias dsh='cd /home/langyi/Tool/deepseek-harness && pnpm dsh'
 # ros2 jazzy
 alias rundriver='sudo systemctl restart driver.service'
 alias runmapping='sudo systemctl restart mapping.service'
+alias runlocation='sudo systemctl restart location.service'
 
 # BEGIN rely_ws CycloneDDS
 # CycloneDDS configuration for rely_ws
 enable_cyclone_dds() {
     export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-    export ROS_DOMAIN_ID=10
+    export ROS_DOMAIN_ID=99
     export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
     export CYCLONEDDS_CONFIG_FILE="/opt/mapping_ws/cyclonedds_remote.xml"
     source "/opt/mapping_ws/configure_cyclonedds_interface.sh"
