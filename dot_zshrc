@@ -12,7 +12,7 @@ plugins=(
     copyfile
     copybuffer
     sudo
-    # zsh-history-substring-search 已禁用：历史搜索改由 fzf Ctrl+R 接管
+    # zsh-history-substring-search 已禁用：历史搜索改由 atuin 的 Ctrl+R 接管
     you-should-use
     ros2-zsh-plugin
     zsh-completions
@@ -35,6 +35,12 @@ ZSH_AUTOSUGGEST_STRATEGY=(history)
 
 # OMZ loads the plugins above and runs compinit once.
 source "$ZSH/oh-my-zsh.sh"
+
+# OMZ 的 lib/theme-and-appearance.zsh 与 lib/directories.zsh 会把 ls/ll
+# 改回 GNU ls（~/.shellrc 的别名会先被它们覆盖），这里在其后重新绑定 lsd。
+if (( ${+functions[lsd_aliases]} )); then
+    lsd_aliases
+fi
 
 # 补全行为：菜单选择 + 大小写不敏感（去掉 r:|=* 过激进匹配）
 zmodload zsh/complist 2>/dev/null || true
@@ -70,13 +76,12 @@ setopt INC_APPEND_HISTORY
 
 # ─── Key bindings ────────────────────────────────────────────────────
 bindkey -e
-# OMZ lib/key-bindings.zsh 会在 fzf 之后把 Ctrl+R 覆盖成 bck-i-search，
-# 这里在 OMZ 之后重新交给 fzf 历史搜索。历史搜索只保留 Ctrl+R → fzf。
-if (( ${+functions[fzf-history-widget]} )); then
-    zle -N fzf-history-widget
-    bindkey -M emacs '^R' fzf-history-widget
-    bindkey -M viins '^R' fzf-history-widget
-    bindkey -M vicmd '^R' fzf-history-widget
+# 历史搜索：Ctrl+R → atuin（替代已卸载的 fzf）。
+# 必须放在 OMZ 之后，否则 OMZ lib/key-bindings.zsh 会把 Ctrl+R 改回 bck-i-search。
+#   --disable-up-arrow：保留下面「上下键 = 普通历史翻页」的行为
+#   --disable-ai      ：不接管 ? 键；想用 Atuin AI 就删掉这个参数
+if command -v atuin >/dev/null 2>&1; then
+    eval "$(atuin init zsh --disable-up-arrow --disable-ai)"
 fi
 # 上下键 / Ctrl+P/N：普通历史翻页（不用 OMZ prefix / substring 搜索）
 zmodload zsh/terminfo 2>/dev/null || true

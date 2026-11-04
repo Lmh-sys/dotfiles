@@ -124,4 +124,13 @@ if ! shopt -oq posix; then
 fi
 
 # ─── Shared bash/zsh tools + user env (see ~/.shellrc) ───────────────
+# atuin 的 PATH 与 Ctrl+R 初始化都在 ~/.shellrc 里完成。
 [ -f "$HOME/.shellrc" ] && . "$HOME/.shellrc"
+
+
+# >>> rely-ros2 DDS >>>
+if [ -f /opt/driver/install/setup.bash ] && [ -f /opt/driver/common/config ]; then
+  source /opt/driver/install/setup.bash
+  alias rundriver='sudo systemctl restart driver.service'
+fi
+# <<< rely-ros2 DDS <<<
