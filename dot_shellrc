@@ -223,3 +223,9 @@ esac
 # deepseek-harness
 alias dsh='cd /home/langyi/Tool/deepseek-harness && pnpm dsh'
 
+## rgf
+rgf() {
+  local -x RGF_QUERY="$1"
+  rg -l -- "$1" |
+    fzf --preview 'rg -n --color=always -C 3 -- "$RGF_QUERY" {}'
+}

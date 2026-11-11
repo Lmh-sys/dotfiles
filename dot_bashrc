@@ -128,9 +128,11 @@ fi
 [ -f "$HOME/.shellrc" ] && . "$HOME/.shellrc"
 
 
+
 # >>> rely-ros2 DDS >>>
 if [ -f /opt/driver/install/setup.bash ] && [ -f /opt/driver/common/config ]; then
   source /opt/driver/install/setup.bash
-  alias rundriver='sudo systemctl restart driver.service'
+  alias runmapping='sudo systemctl restart mapping.service'
+  alias runlocation='sudo systemctl restart location.service'
 fi
 # <<< rely-ros2 DDS <<<
